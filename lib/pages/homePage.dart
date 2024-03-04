@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -91,9 +89,9 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () async {
                           try {
                             await requestStoragePermission();
-                            if (permission) {
+
                               imagePath = await pickAndSaveImage();
-                            }
+
                             setState(() {});
                           } catch (e) {
                             d.log("Error[Request Permission and Camera Open]:",
@@ -254,22 +252,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> requestStoragePermission() async {
-    try {
-      final status = await Permission.storage.request();
-      if (status == PermissionStatus.granted) {
-        permission = true;
-      } else {
-        // Handle permission denied case
-        permission = false;
-      }
-    } catch (e) {
-      d.log("error: [Request Camera Permission ]: $e");
-    }
+    await Permission.camera.request();
+    await Permission.storage.request();
+    await Permission.photos.request();
   }
 
   Future<String?> pickAndSaveImage() async {
     try {
-      pickedFile = (await ImagePicker().pickImage(source: ImageSource.camera));
+      pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
       if (pickedFile == null) {
         return null;
       } else {
@@ -295,7 +285,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
   Future<File> getImageFileFromAssets(String path) async {
-    final byteData = await rootBundle.load('$path');
+    final byteData = await rootBundle.load(path);
 
     final file = File('${(await getTemporaryDirectory()).path}/$path');
     await file.create(recursive: true);
@@ -308,11 +298,13 @@ class _HomePageState extends State<HomePage> {
       String imagePath, String id, String name) async {
 
       await ImageGallerySaver.saveFile(imagePath, name: '$name-$id');
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: Colors.indigoAccent,
-        content: Center(child: Text("Save Successfully")),
-      ));
-      setState(()async {
+     if(mounted){
+       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+         backgroundColor: Colors.indigoAccent,
+         content: Center(child: Text("Save Successfully")),
+       ));
+     }
+
         idController.clear();
         nameController.clear();
         imagePath = '';
@@ -321,6 +313,6 @@ class _HomePageState extends State<HomePage> {
         nameFocusNode.unfocus();
         setState(() {
         });
-      });
+
   }
 }
