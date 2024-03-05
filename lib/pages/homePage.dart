@@ -297,7 +297,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> saveImageToGallery(
       String imagePath, String id, String name) async {
 
-      await ImageGallerySaver.saveFile(imagePath, name: '$name-$id');
+      await ImageGallerySaver.saveFile(imagePath, name: '$id-$name');
      if(mounted){
        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
          backgroundColor: Colors.indigoAccent,
