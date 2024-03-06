@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
   var pickedFile;
   bool permission = false;
   var images;
+  final picker = ImagePicker();
 
   TextEditingController idController = TextEditingController();
   TextEditingController nameController = TextEditingController();
@@ -259,7 +260,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<String?> pickAndSaveImage() async {
     try {
-      pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
+      pickedFile = await ImagePicker().pickImage(source: ImageSource.camera,imageQuality: 5);
       if (pickedFile == null) {
         return null;
       } else {
@@ -284,7 +285,7 @@ class _HomePageState extends State<HomePage> {
       d.log("Error: [Camera Open And Image Pick] :$e");
     }
   }
-  Future<File> getImageFileFromAssets(String path) async {
+/*  Future<File> getImageFileFromAssets(String path) async {
     final byteData = await rootBundle.load(path);
 
     final file = File('${(await getTemporaryDirectory()).path}/$path');
@@ -292,8 +293,27 @@ class _HomePageState extends State<HomePage> {
     await file.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
 
     return file;
+  }*/
+  Future<void> pickAndDeleteImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      // Perform deletion
+      await deleteImage(pickedFile.path);
+      print('Image deleted successfully!');
+    } else {
+      print('No image selected.');
+    }
   }
-
+  Future<void> deleteImage(String imagePath) async {
+    try {
+      final file = File(imagePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      print('Failed to delete image: $e');
+    }
+  }
   Future<void> saveImageToGallery(
       String imagePath, String id, String name) async {
 
